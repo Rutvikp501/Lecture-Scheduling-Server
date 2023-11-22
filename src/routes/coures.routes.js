@@ -24,7 +24,7 @@ CourseRouter.get('/instructor',async(req,res)=>{
             res.status(500).send("Error")
         }
     })
-CourseRouter.get('/couresallocation',async(req,res)=>{
+CourseRouter.get('/instructordata',async(req,res)=>{
         try {
             const Allinstructor = await UserModel.find({Role:"Instructor"})
             const AllCourse = await CourseModel.find({})
@@ -34,6 +34,41 @@ CourseRouter.get('/couresallocation',async(req,res)=>{
         }
     })
 
+
+
+    CourseRouter.post('/coursealocate',async(req,res)=>{
+        const {Instructor,Course,Date}=req.body;
+        console.log(req.body);
+        try {
+            const Coursedetails = await CourseModel.findById({_id:Course})
+            const Instructordetails = await UserModel.findById({_id:Instructor})
+            let Lectures = Coursedetails.Lectures
+            let flag = false
+          
+            for (let index = 0; index < Lectures.length; index++) {
+              const element = Lectures[index]
+              if (element.Instructor == Instructordetails.Name && element.Date == Date){
+                flag = true
+                res.status(500).json("Instructor Allready has a slot Booked")
+                break
+              }
+            }
+          
+            if(!flag){
+              const lectureData={
+                Date:Date,
+                Instructor:Instructordetails.Name,
+              }
+              Coursedetails.Lectures.push(lectureData)
+              
+              const datas = await CourseModel.findByIdAndUpdate({_id:Course},Coursedetails)
+              res.status(200).json({datas:datas});
+            }
+            
+          } catch (error) {
+            res.status(500).json({message: "Error:", error: error})
+          }
+    })
     CourseRouter.post('/create',async(req,res)=>{
         const {CoverImg}=req.body;
         try {

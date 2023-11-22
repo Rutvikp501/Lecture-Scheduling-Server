@@ -1,8 +1,9 @@
+const { string } = require('joi');
 const mongoose = require('mongoose');
 
 const LecturesSchema = new mongoose.Schema({
-    Date:{},
-    Instructor:{},
+    Date:{type:String,required:true},
+    Instructor:{type:String,required:true},
 })
 
 
