@@ -13,5 +13,5 @@ app.get("/", async (req, res) => {
 
 // Route urls
 require("./users.js")(app);
-require("./coures.routes.js")(app);
+require("./coures.js")(app);
 

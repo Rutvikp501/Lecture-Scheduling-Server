@@ -1,5 +1,5 @@
 "use strict";
-const CourseModel = require("../model/Coures/Coures.model")
+const CourseModel = require("../model/Coures/Coures")
 
 CourseModel.pre('save', async function (next) {
     const instructorLectures = await CourseModel.find({

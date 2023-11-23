@@ -1,7 +1,7 @@
 module.exports = (app) => {
 const express = require('express');
 const { UserModel } = require('../model/User/User');
-const { CourseModel } = require('../model/Coures/Coures.model');
+const { CourseModel } = require('../model/Coures/Coures');
 const { cloudinary } = require('../utils/cloudinary');
 const CourseRouter = express.Router()
 
@@ -24,6 +24,8 @@ CourseRouter.get('/instructor',async(req,res)=>{
             res.status(500).send("Error")
         }
     })
+
+
 CourseRouter.get('/instructordata',async(req,res)=>{
         try {
             const Allinstructor = await UserModel.find({Role:"Instructor"})
@@ -35,23 +37,80 @@ CourseRouter.get('/instructordata',async(req,res)=>{
     })
 
 
+    CourseRouter.post('/instructorLecture',async(req,res)=>{
+        const {Email}=req.body;
+        try {
+            const Allinstructor = await UserModel.find({Email:Email})
+            const AllCourse = await CourseModel.find({})
+            let instructorName = Allinstructor[0].Name
+            //console.log(AllCourse);
+
+            const coursesWithInstructor = AllCourse.filter((course) => {
+                for (const lecture of course.Lectures) {
+                  if (lecture.Instructor === instructorName) {
+                    return true;
+                  }
+                }
+                return false;
+              });
+              
+              const filteredData = coursesWithInstructor.map((course) => {
+                const lectureWithInstructor = course.Lectures.find((lecture) => lecture.Instructor === instructorName);
+                return {
+                  courseName: course.Name,
+                  lectureDate: lectureWithInstructor.Date,
+                };
+              });
+            res.status(200).json(filteredData)
+        } catch (error) {
+            res.status(500).send("Error")
+        }
+    })
 
     CourseRouter.post('/coursealocate',async(req,res)=>{
         const {Instructor,Course,Date}=req.body;
+       // console.log(req.body);
+       const Coursedetails = await CourseModel.findById({_id:Course})
+       const Instructordetails = await UserModel.findById({_id:Instructor})
+       const AllCourse = await CourseModel.find({})
         try {
-            const Coursedetails = await CourseModel.findById({_id:Course})
-            const Instructordetails = await UserModel.findById({_id:Instructor})
+            let instructorName = Instructordetails.Name
             let Lectures = Coursedetails.Lectures
             let flag = false
-          
-            for (let index = 0; index < Lectures.length; index++) {
-              const element = Lectures[index]
-              if (element.Instructor == Instructordetails.Name && element.Date == Date){
-                flag = true
-                res.status(500).json( "Instructor Allready has a slot Booked")
-                break
+          const coursesWithInstructor = AllCourse.filter((course) => {
+                for (const lecture of course.Lectures) {
+                  if (lecture.Instructor === instructorName) {
+                    return true;
+                  }
+                }
+                return false;
+              });
+              
+              const filteredData = coursesWithInstructor.map((course) => {
+                const lectureWithInstructor = course.Lectures.find((lecture) => lecture.Instructor === instructorName);
+                return {
+                  courseName: course.Name,
+                  lectureDate: lectureWithInstructor.Date,
+                };
+              });
+              for (let i = 0; i < filteredData.length; i++) {
+                const course = filteredData[i];
+                if (course.lectureDate == Date ){
+                    flag = true
+               res.status(500).json( "Instructor Allready has a slot Booked For that day ")
+               break
+                }
+
               }
-            }
+
+            // for (let index = 0; index < Lectures.length; index++) {
+            //   const element = Lectures[index]
+            //   if (element.Instructor == Instructordetails.Name && element.Date == Date){
+            //     flag = true
+            //     res.status(500).json( "Instructor Allready has a slot Booked")
+            //     break
+            //   }
+            // }
           
             if(!flag){
               const lectureData={
