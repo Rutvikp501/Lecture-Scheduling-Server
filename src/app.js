@@ -35,7 +35,7 @@ http.listen(port, () => {
     console.log(error);
   }
     console.info(
-      `Server is running on port ${port}. Env:- ${process.env.NODE_ENV}`
+      `Server is running on port http://localhost:${port}/`
     );
   });
 

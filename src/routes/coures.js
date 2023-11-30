@@ -9,8 +9,13 @@ const CourseRouter = express.Router()
 CourseRouter.get('/',async(req,res)=>{
         try {
             const AllCourse = await CourseModel.find({})
-            
-            res.status(200).json(AllCourse)
+            const currentDate = new Date()
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const day = currentDate.getDate();
+            const todaydate = `${year}-${month}-${day}`
+            let data = {AllCourse,todaydate}
+            res.status(200).json(data)
         } catch (error) {
             res.status(500).send("Error")
         }
